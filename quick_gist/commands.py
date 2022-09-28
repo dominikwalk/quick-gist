@@ -95,36 +95,41 @@ The following options for getting your API token are available:
 - from configuration file [2]""",
         validation_function=lambda x: x in ["1", "2"],
     )
-    if api_token_selection == "1":
-        api_token = "env"
+
+    api_token = _get_user_input(
+        msg="Your GitHub API token: ",
+        validation_function=lambda x: isinstance(x, str),
+    )
+
+    _validate_github_user_apitoken(username=user_name, api_token=api_token)
+
+    encryption_selection = _get_user_input(
+        msg="Do you want to save your API token password encrypted? (Y/n)",
+        validation_function=lambda x: x in ["y", "Y", "n", "N"],
+    )
+    user_encryption = True if encryption_selection.lower() == "y" else False
+
+    if user_encryption:
+        # encrypt user api token
+        psw = getpass.getpass(prompt="Password: ")
+        api_token = _password_encrypt(
+            message=api_token.encode("utf-8"),
+            password=psw,
+        ).decode("utf-8")
+        user_encryption = True
+    else:
         user_encryption = False
+
+    if api_token_selection == "1":
+        # save api token in environment variable
+        api_token_conf = "env"
     elif api_token_selection == "2":
         user_token_source = "config"
-        encryption_selection = _get_user_input(
-            msg="Do you want to save your API token password encrypted? (Y/n)",
-            validation_function=lambda x: x in ["y", "Y", "n", "N"],
-        )
-        user_encryption = True if encryption_selection.lower() == "y" else False
-
-        api_token = _get_user_input(
-            msg="Your GitHub API token: ",
-            validation_function=lambda x: isinstance(x, str),
-        )
-
-        _validate_github_user_apitoken(username=user_name, api_token=api_token)
-
-        if user_encryption:
-            # encrypt user api token
-            psw = getpass.getpass(prompt="Password: ")
-            api_token = _password_encrypt(
-                message=api_token.encode("utf-8"),
-                password=psw,
-            ).decode("utf-8")
-
+        api_token_conf = api_token
     # create new user with given properties
     new_user = dict()
     new_user[user_name] = {
-        "auth": api_token,
+        "auth": api_token_conf,
         "encrypted": user_encryption,
     }
 
@@ -140,6 +145,12 @@ The following options for getting your API token are available:
     # write down the new user configuration
     _write_user_config(FULL_CONFIG_PATH, user_configuration)
     logging.info(f"Successfully added user '{user_name}' to configuration")
+    if api_token_conf == "env":
+        print(
+            "\nPlease save your API token in an environment variable with the following name:\n"
+            f"QUICK_GIST_{user_name.upper()}_AUTH",
+        )
+        print(f"API-Token{' (encrypted)' if user_encryption else ''}: {api_token}")
 
 
 def command_new(args: argparse.Namespace) -> None:
@@ -301,16 +312,21 @@ def command_new(args: argparse.Namespace) -> None:
     # get user api token
     for user in user_configuration["user"]:
         if list(user.keys())[0] == user_name:
-            # check if api token is encrypted
-            if user[user_name]["encrypted"] == False:
-                user_token = user[user_name]["auth"]
+            if user[user_name]["auth"] == "env":
+                # get user api token from ENV variable
+                user_token_raw = os.environ[f"QUICK_GIST_{user_name.upper()}_AUTH"]
             else:
+                # get user api token from user confiuration file
+                user_token_raw = user[user_name]["auth"]
+
+            # check if api token is encrypted
+            if user[user_name]["encrypted"] == True:
                 # ask for password to decrypt the user api token
                 while True:
                     psw = getpass.getpass(prompt="Password: ")
                     try:
                         user_token = _password_decrypt(
-                            token=user[user_name]["auth"].encode("utf-8"),
+                            token=user_token_raw.encode("utf-8"),
                             password=psw,
                         ).decode("utf-8")
                         # valid password, break out of loop
@@ -318,6 +334,9 @@ def command_new(args: argparse.Namespace) -> None:
                     except UserCredentialsError:
                         # invalid password, stay in loop and ask again
                         pass
+            else:
+                user_token = user_token_raw
+            # found user in user configuration and break out of loop
             break
 
     # try to post gist on github
