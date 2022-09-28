@@ -301,16 +301,21 @@ def command_new(args: argparse.Namespace) -> None:
     # get user api token
     for user in user_configuration["user"]:
         if list(user.keys())[0] == user_name:
-            # check if api token is encrypted
-            if user[user_name]["encrypted"] == False:
-                user_token = user[user_name]["auth"]
+            if user[user_name]["auth"] == "env":
+                # get user api token from ENV variable
+                user_token_raw = os.environ[f"QUICK_GIST_{user_name.upper()}_AUTH"]
             else:
+                # get user api token from user confiuration file
+                user_token_raw = user[user_name]["auth"]
+
+            # check if api token is encrypted
+            if user[user_name]["encrypted"] == True:
                 # ask for password to decrypt the user api token
                 while True:
                     psw = getpass.getpass(prompt="Password: ")
                     try:
                         user_token = _password_decrypt(
-                            token=user[user_name]["auth"].encode("utf-8"),
+                            token=user_token_raw.encode("utf-8"),
                             password=psw,
                         ).decode("utf-8")
                         # valid password, break out of loop
@@ -318,6 +323,9 @@ def command_new(args: argparse.Namespace) -> None:
                     except UserCredentialsError:
                         # invalid password, stay in loop and ask again
                         pass
+            else:
+                user_token = user_token_raw
+            # found user in user configuration and break out of loop
             break
 
     # try to post gist on github
