@@ -93,10 +93,18 @@ def _post_github_gist(gist_content: GistContent, api_token: str) -> Optional[str
             gist_url = ret["html_url"]
             # return github gist url
             return gist_url
-
-        # TODO: implement other status codes
         else:
+            ret = json.loads(res.text)
+            api_response_message = ret["message"]
+            api_documentation_url = ret["documentation_url"]
+            raise GithubApiError(
+                f"Failed to create gist. API error: {api_response_message}\n"
+                f"Please refer to: {api_documentation_url}",
+            )
+
             return None
+
     except requests.exceptions.ConnectionError:
         GithubApiError(f"Failed to create gist (connection error)")
+
         return None
