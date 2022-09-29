@@ -6,6 +6,7 @@ from typing import Sequence
 from quick_gist.commands import command_add_user
 from quick_gist.commands import command_list_user
 from quick_gist.commands import command_new
+from quick_gist.commands import command_remove_user
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -17,7 +18,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(
         description="""
                 A tool that allows yout to quickly create
-                github gists from local files
+                Github gists from your files
                 """,
     )
 
@@ -27,13 +28,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # subparser to add a new github user to user confiuration
     parser_adduser = subparser.add_parser(
         "add-user",
-        help="Add a new github user to the configuration",
+        help="Add a new Github user to the configuration",
+    )
+
+    # subparser to remove a github user from the user confiuration
+    parser_removeuser = subparser.add_parser(
+        "remove-user",
+        help="Remove a Github user from the configuration",
     )
 
     # subparser to list all github users from user configuration file
-    parser_adduser = subparser.add_parser(
+    parser_listuser = subparser.add_parser(
         "list-user",
-        help="List all github users from configuration file",
+        help="List all Github users from the configuration",
     )
 
     # subparser to create a new github gist
@@ -89,12 +96,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         parser.error("quick-gist needs at least one positional argument (see -h)")
 
     if args.command == "add-user":
-        # handle add-user command
         command_add_user(args=args)
+    elif args.command == "remove-user":
+        command_remove_user(args=args)
     elif args.command == "list-user":
         command_list_user(args=args)
     elif args.command == "new":
-        # handle new command
         command_new(args=args)
     return 0
 

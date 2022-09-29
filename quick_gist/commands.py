@@ -380,3 +380,38 @@ def command_list_user(args: argparse.Namespace) -> None:
         print(
             f"- {user_name} (API-Token [{encryption_info_str}] from: {api_token_info_str})",
         )
+
+
+def command_remove_user(args: argparse.Namespace) -> None:
+    """Remove one github user from configuration file"""
+    user_configuration = _read_user_config(path=FULL_CONFIG_PATH)
+    all_user = user_configuration["user"]
+    if len(all_user) == 0:
+        raise UserCommandError("No github users found in user configuration")
+
+    print("Which of the following users would you like to remove?")
+    for i, user in enumerate(all_user):
+        user_name = list(user.keys())[0]
+        print(f"[{i}] {user_name}")
+
+    user_remove_idx = int(
+        _get_user_input(
+            msg=f"Index: ",
+            validation_function=lambda x: x in [str(i) for i in range(len(all_user))],
+        ),
+    )
+
+    user_remove_name = list(all_user[user_remove_idx].keys())[0]
+    user_confirmation_str = _get_user_input(
+        msg=f"Do you really want to remove the user '{user_remove_name}' (Y/n)",
+        validation_function=lambda x: x in ["y", "Y", "n", "N"],
+    )
+
+    if user_confirmation_str.lower() == "y":
+        all_user.pop(user_remove_idx)
+
+        user_configuration["user"] = all_user
+
+        _write_user_config(path=FULL_CONFIG_PATH, data=user_configuration)
+    else:
+        logging.info("Aboring")

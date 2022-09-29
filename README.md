@@ -4,6 +4,4 @@
 A tool that allows to quickly create github gists from local files.
 
 ## TODO
-- implement list-user command
-- implement remove-user command
-- implement default-config command
+- unittests
