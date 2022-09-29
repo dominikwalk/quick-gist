@@ -29,7 +29,7 @@ USER_CONFIG_PATH = str(os.getenv("HOME")) + "/.config/quick-gist/"
 USER_CONFIG_NAME = "quick-gist-config.yaml"
 FULL_CONFIG_PATH = Path(f"{USER_CONFIG_PATH}{USER_CONFIG_NAME}")
 
-NEW_SUBFILE_PATTERN = re.compile(r"^(\w+?.\w+)\[([\d+\-\d+?,]+)\]$")
+NEW_SUBFILE_PATTERN = re.compile(r"^([\w\-. ]+?.\w+)\[([\d+\-\d+?,]+)\]$")
 
 
 class term_colors:
