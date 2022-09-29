@@ -18,7 +18,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(
         description="""
                 A tool that allows yout to quickly create
-                github gists from local files
+                Github gists from your files
                 """,
     )
 
