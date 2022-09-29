@@ -4,6 +4,7 @@ from typing import Optional
 from typing import Sequence
 
 from quick_gist.commands import command_add_user
+from quick_gist.commands import command_list_user
 from quick_gist.commands import command_new
 
 
@@ -27,6 +28,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser_adduser = subparser.add_parser(
         "add-user",
         help="Add a new github user to the configuration",
+    )
+
+    # subparser to list all github users from user configuration file
+    parser_adduser = subparser.add_parser(
+        "list-user",
+        help="List all github users from configuration file",
     )
 
     # subparser to create a new github gist
@@ -84,6 +91,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if args.command == "add-user":
         # handle add-user command
         command_add_user(args=args)
+    elif args.command == "list-user":
+        command_list_user(args=args)
     elif args.command == "new":
         # handle new command
         command_new(args=args)

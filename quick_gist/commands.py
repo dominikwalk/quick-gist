@@ -360,3 +360,23 @@ def command_new(args: argparse.Namespace) -> None:
     print(f"-> {gist_url}")
 
     return
+
+
+def command_list_user(args: argparse.Namespace) -> None:
+    """List all github users from user configuration file"""
+    user_configuration = _read_user_config(path=FULL_CONFIG_PATH)
+    all_user = user_configuration["user"]
+    for user in all_user:
+        user_name = list(user.keys())[0]
+        api_token_info_str = (
+            "environment variable"
+            if (user[user_name]["auth"] == "env")
+            else "configuration file"
+        )
+        encryption_info_str = (
+            "encrypted" if user[user_name]["encrypted"] else "not encrypted"
+        )
+
+        print(
+            f"- {user_name} (API-Token [{encryption_info_str}] from: {api_token_info_str})",
+        )
