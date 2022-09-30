@@ -270,7 +270,7 @@ def command_new(args: argparse.Namespace) -> None:
 
     # get public option either from command line argument or from user configuration file
     if not args.public:
-        publish_type = (
+        publish_type=(
             False if (user_configuration["default"]["publish"] == "private") else True
         )
     else:
@@ -314,7 +314,13 @@ def command_new(args: argparse.Namespace) -> None:
         if list(user.keys())[0] == user_name:
             if user[user_name]["auth"] == "env":
                 # get user api token from ENV variable
-                user_token_raw = os.environ[f"QUICK_GIST_{user_name.upper()}_AUTH"]
+                try:
+                    user_token_raw = os.environ[f"QUICK_GIST_{user_name.upper()}_AUTH"]
+                except KeyError:
+                    raise UserCommandError(
+                        msg=f"Could not find environment variable"
+                        f"QUICK_GIST_{user_name.upper()}_AUTH"
+                    )
             else:
                 # get user api token from user confiuration file
                 user_token_raw = user[user_name]["auth"]
