@@ -58,6 +58,73 @@ def _get_user_input(msg: str, validation_function: Callable[..., bool]) -> str:
             print("Invalid input, please try again")
 
 
+def _read_files(files: List[FileDescriptor], softfail=False) -> dict:
+    """Read in file content as described in the list of FileDescriptors"""
+    parsed_files = OrderedDict()
+    for file, line_blocks in files:
+        # create a new empty content field for each new file
+        content = ""
+        file_path = file.resolve()
+        try:
+            with open(file_path, "r") as f:
+                if len(line_blocks) == 0:
+                    content = f.read()
+                    logging.debug("Including all lines from file '{file.name}'")
+                else:
+                    all_lines = f.readlines()
+                    for line_pair in line_blocks:
+                        first_line, second_line = line_pair[0], line_pair[1]
+                        # wrong order of line numbers
+                        if second_line < first_line:
+                            logging.warning(
+                                f"First line number must be lower "
+                                f"then the second one (skipping "
+                                f"'{file.name}',{line_pair})",
+                            )
+                        elif first_line <= 0:
+                            logging.warning(
+                                f"Line {first_line} does not exist in "
+                                f"'{file.name}' (skipping)",
+                            )
+                        # line number does not exist
+                        elif second_line > len(all_lines):
+                            logging.warning(
+                                f"Line {second_line} does not exist in file "
+                                f"'{file.name}' (skipping lines [{first_line}-{second_line}])",
+                            )
+                        # if both lines are the same, include exactly that line
+                        elif first_line == second_line:
+                            content += all_lines[first_line - 1]
+                            logging.debug(
+                                f"Including line {first_line} in file {file.name}",
+                            )
+                        # otherwise read specific lines
+                        else:
+                            content += "".join(
+                                all_lines[first_line - 1 : second_line],
+                            )
+                            logging.debug(
+                                "Including lines {first_line}-"
+                                f"{second_line} in file '{file.name}'",
+                            )
+                        # otherwise read specific lines
+                # create content object for api request
+                file_descriptor = {"content": content}
+                parsed_files[file.name] = file_descriptor
+
+        except IOError:
+            if softfail:
+                logging.warning(
+                    f"Failed to open/read file '{file.name}' (skipping)",
+                )
+            else:
+                raise UserCommandError(
+                    f"Failed to open/read file '{file.name}'(aborting)",
+                )
+
+    return parsed_files
+
+
 def command_add_user(args: argparse.Namespace) -> None:
     """Add a new github user to the quick-gist configuration"""
     # check if the config directory exists
@@ -156,71 +223,6 @@ The following options for getting your API token are available:
 def command_new(args: argparse.Namespace) -> None:
     """Create a new github gist"""
 
-    def _read_files(files: List[FileDescriptor]) -> dict:
-        """Read in file content as described in the list of FileDescriptors"""
-        parsed_files = OrderedDict()
-        for file, line_blocks in files:
-            # create a new empty content field for each new file
-            content = ""
-            file_path = file.resolve()
-            try:
-                with open(file_path, "r") as f:
-                    if len(line_blocks) == 0:
-                        content = f.read()
-                        logging.debug("Including all lines from file '{file.name}'")
-                    else:
-                        all_lines = f.readlines()
-                        for line_pair in line_blocks:
-                            first_line, second_line = line_pair[0], line_pair[1]
-                            # wrong order of line numbers
-                            if second_line < first_line:
-                                logging.warning(
-                                    f"First line number must be lower "
-                                    f"then the second one (skipping "
-                                    f"'{file.name}',{line_pair})",
-                                )
-                            elif first_line <= 0:
-                                logging.warning(
-                                    f"Line {first_line} does not exist in "
-                                    f"'{file.name}' (skipping)",
-                                )
-                            # line number does not exist
-                            elif second_line > len(all_lines):
-                                logging.warning(
-                                    f"Line {second_line} does not exist in file "
-                                    f"'{file.name}' (skipping lines [{first_line}-{second_line}])",
-                                )
-                            # if both lines are the same, include exactly that line
-                            elif first_line == second_line:
-                                content += all_lines[first_line - 1]
-                                logging.debug(
-                                    f"Including line {first_line} in file {file.name}",
-                                )
-                            # otherwise read specific lines
-                            else:
-                                content += "".join(
-                                    all_lines[first_line - 1 : second_line],
-                                )
-                                logging.debug(
-                                    "Including lines {first_line}-"
-                                    f"{second_line} in file '{file.name}'",
-                                )
-                            # otherwise read specific lines
-                    # create content object for api request
-                    file_descriptor = {"content": content}
-                    parsed_files[file.name] = file_descriptor
-            except IOError:
-                if args.softfail:
-                    logging.warning(
-                        f"Failed to open/read file '{file.name}' (skipping)",
-                    )
-                else:
-                    raise UserCommandError(
-                        f"Failed to open/read file '{file.name}'(aborting)",
-                    )
-
-        return parsed_files
-
     files_argument = args.files
     # parse the file argument to create a list of files to parse
     # and remember which lines to include
@@ -254,7 +256,7 @@ def command_new(args: argparse.Namespace) -> None:
         # add the new FileDescriptor to the list of descriptions of files to parse
         files_to_parse.append(new_file_desc)
 
-    parsed_files = _read_files(files_to_parse)
+    parsed_files = _read_files(files=files_to_parse, softfail=args.softfail)
 
     for parsed_file in parsed_files.items():
         if len(parsed_file[1]["content"]) != 0:
