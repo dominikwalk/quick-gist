@@ -1,3 +1,6 @@
+import logging
+import os
+import shutil
 from pathlib import Path
 
 import pytest
@@ -11,7 +14,7 @@ from quick_gist.credentials import UserCredentialsError
 from quick_gist.credentials import UserOsError
 
 
-TEST_USER_CONFIG_PATH = "." + "/.config/quick-gist/"
+TEST_USER_CONFIG_PATH = Path("." + "/.config/quick-gist/")
 TEST_USER_CONFIG_NAME = "quick-gist-config.yaml"
 TEST_FULL_CONFIG_PATH = Path(f"{TEST_USER_CONFIG_PATH}{TEST_USER_CONFIG_NAME}")
 
@@ -81,3 +84,12 @@ def test_create_user_config_dir_illegal():
             == f"Could not create a new user configuraion dir at {ILLEGAL_USER_CONFIG_PATH}"
         )
     assert exc_info_sys.value.code == 1
+
+
+def test_create_user_config_dir_legal(caplog):
+    with caplog.at_level(logging.INFO):
+        _create_user_config_dir(path=TEST_USER_CONFIG_PATH)
+
+    assert f"Created directory at {TEST_USER_CONFIG_PATH}"
+
+    shutil.rmtree(path=Path(".config"))
