@@ -90,7 +90,7 @@ def _check_user_config_existance(path: pathlib.Path) -> None:
 def _create_user_config_dir(path: pathlib.Path) -> None:
     """Create the default directory where the user configuration is stored"""
     try:
-        os.mkdir(path)
+        path.mkdir(parents=True)
     except:
         raise UserOsError(f"Could not create a new user configuraion dir at {path}")
     else:
