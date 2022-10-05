@@ -18,10 +18,9 @@ crypto_backend = default_backend()
 crypto_iterations = 390000
 
 
-class UserOsError(Exception):
+class UserOsError(SystemExit):
     def __init__(self, msg=""):
         logging.error(f"UserOsError: {msg}")
-        exit(1)
 
 
 class UserCredentialsError(Exception):
