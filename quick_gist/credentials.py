@@ -18,17 +18,14 @@ crypto_backend = default_backend()
 crypto_iterations = 390000
 
 
-class UserOsError(Exception):
+class UserOsError(SystemExit):
     def __init__(self, msg=""):
         logging.error(f"UserOsError: {msg}")
-        exit(1)
 
 
 class UserCredentialsError(Exception):
-    def __init__(self, msg="", exit=False):
+    def __init__(self, msg=""):
         logging.error(f"UserCredentialsError: {msg}")
-        if exit:
-            exit(1)
 
 
 def _crypto_derive_key(
@@ -76,7 +73,7 @@ def _password_decrypt(token: bytes, password: str) -> bytes:
     try:
         token = Fernet(key).decrypt(token)
     except InvalidToken:
-        raise UserCredentialsError("Invalid Password", exit=False)
+        raise UserCredentialsError("Invalid Password")
 
     return token
 
@@ -90,7 +87,7 @@ def _check_user_config_existance(path: pathlib.Path) -> None:
 def _create_user_config_dir(path: pathlib.Path) -> None:
     """Create the default directory where the user configuration is stored"""
     try:
-        os.mkdir(path)
+        path.mkdir(parents=True)
     except:
         raise UserOsError(f"Could not create a new user configuraion dir at {path}")
     else:
