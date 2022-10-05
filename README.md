@@ -44,13 +44,13 @@ Creating a new Github Gist works with the following command:
 quick-gist new -f file1.txt file2.txt
 ```
 ##### Command line options
-``-f/--files`` files from which you want to create your new Github Gist.
+``-f/--files`` files from which you want to create your new Github Gist
 
 ``-d/--description`` (optional)  the Github Gist description
 
 ``-p/--public`` (optional)  make the Github Gist public, **default is secret**
 
-``-sf/--softfail`` (optional) issue a warning instead of aborting if the program cannot read a file, **default disabled**.
+``-sf/--softfail`` (optional) issue a warning instead of aborting if the program cannot read a file, **default disabled**
 
 ``-u/--user`` (optional) specify Github username if you have more then one user configured
 
