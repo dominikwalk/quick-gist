@@ -10,9 +10,12 @@ from quick_gist.credentials import _create_default_user_config
 from quick_gist.credentials import _create_user_config_dir
 from quick_gist.credentials import _password_decrypt
 from quick_gist.credentials import _password_encrypt
+from quick_gist.credentials import _read_user_config
+from quick_gist.credentials import _write_user_config
 from quick_gist.credentials import crypto_iterations
 from quick_gist.credentials import UserCredentialsError
 from quick_gist.credentials import UserOsError
+
 
 TEST_USER_CONFIG_PATH = Path("." + "/.config/quick-gist/")
 TEST_USER_CONFIG_NAME = "quick-gist-config.yaml"
@@ -126,8 +129,35 @@ def test_create_user_config(caplog):
     shutil.rmtree(path=Path(".config"))
 
 
-def pytest_sessionfinish(session, exitstatus):
-    """Called when whole test run is finished"""
+def test_read_write_user_config():
+    """Test reading an writing of a user configuration file"""
+    _create_user_config_dir(path=TEST_USER_CONFIG_PATH)
+    # create default configuration file
+    _create_default_user_config(path=TEST_FULL_CONFIG_PATH)
 
-    # clean up test directory in case anthing failed before
+    test_user_config = _read_user_config(path=TEST_FULL_CONFIG_PATH)
+    # add test user to configuration file
+    new_user = dict()
+    new_user["testuser"] = {"auth": "test_token", "encrypted": False}
+    all_users = [new_user]
+    # modify default user configuration
+    test_user_config["user"] = all_users
+    # write new user configuration
+    _write_user_config(path=TEST_FULL_CONFIG_PATH, data=test_user_config)
+
+    read_test_user_config = _read_user_config(path=TEST_FULL_CONFIG_PATH)
+
+    assert read_test_user_config == test_user_config
+
+    # clean up test directory
     shutil.rmtree(path=Path(".config"))
+
+
+@pytest.fixture(scope="session", autouse=True)
+def cleanup_testdir(request):
+    """Clean up test directory and remove configuration dir if needed"""
+
+    def remove_test_dir():
+        shutil.rmtree(path=Path(".config"), ignore_errors=True)
+
+    request.addfinalizer(remove_test_dir)
