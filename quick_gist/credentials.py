@@ -24,10 +24,8 @@ class UserOsError(SystemExit):
 
 
 class UserCredentialsError(Exception):
-    def __init__(self, msg="", exit=False):
+    def __init__(self, msg=""):
         logging.error(f"UserCredentialsError: {msg}")
-        if exit:
-            exit(1)
 
 
 def _crypto_derive_key(
@@ -75,7 +73,7 @@ def _password_decrypt(token: bytes, password: str) -> bytes:
     try:
         token = Fernet(key).decrypt(token)
     except InvalidToken:
-        raise UserCredentialsError("Invalid Password", exit=False)
+        raise UserCredentialsError("Invalid Password")
 
     return token
 
