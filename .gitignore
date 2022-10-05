@@ -1,0 +1,8 @@
+__pycache__
+.venv
+clean.sh
+dist
+build
+*egg-info
+todo.txt
+.coverage
