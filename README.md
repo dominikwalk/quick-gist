@@ -1,5 +1,5 @@
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/dominikwalk/quick_gist/master.svg)](https://results.pre-commit.ci/latest/github/dominikwalk/quick_gist/master)
-
+[![codecov](https://codecov.io/github/dominikwalk/quick-gist/branch/master/graph/badge.svg?token=ZXWA8HO7I4)](https://codecov.io/github/dominikwalk/quick-gist)
 # quick-gist
 A tool that allows to quickly create Github Gists from your files.
 
