@@ -6,3 +6,4 @@ build
 *egg-info
 todo.txt
 .coverage
+.tox
