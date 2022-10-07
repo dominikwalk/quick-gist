@@ -1,3 +1,4 @@
+[![tests](https://github.com/dominikwalk/quick-gist/actions/workflows/tests.yaml/badge.svg)](https://github.com/dominikwalk/quick-gist/actions/workflows/tests.yaml)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/dominikwalk/quick_gist/master.svg)](https://results.pre-commit.ci/latest/github/dominikwalk/quick_gist/master)
 [![codecov](https://codecov.io/github/dominikwalk/quick-gist/branch/master/graph/badge.svg?token=ZXWA8HO7I4)](https://codecov.io/github/dominikwalk/quick-gist)
 # quick-gist
