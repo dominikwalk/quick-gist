@@ -6,6 +6,7 @@ A tool that allows to quickly create Github Gists from your files.
 
 
 ## Installation
+(as soon as it is published, which is not yet the case at the moment)
 ```console
 pip install quick-gist
 ```
