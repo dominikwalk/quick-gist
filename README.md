@@ -92,5 +92,16 @@ This command will allow you to add a new Github user to your configuration
 - Add command to renew Gihub API token
 - Unittest (and refactor some functions to make them easier to test)
 
+## Contribution
+This repo uses a few tools to ensure CI.
+
+**pre-commit:** A tool for managing git hooks. See: https://pre-commit.com/
+
+**Pytest:** A Python testing tool. See: https://docs.pytest.org
+
+**Tox:** A virtualenv management and test tool. See: https://tox.wiki
+
+The configuration files for all these tools are included in the repo and they are all pretty easy to use. But if you have any questions about them, feel free to ask. However, if you plan to contribute to the project, I would appreciate it if you would use the tools to review your code before submitting a pull request.
+
 ---
 Any pull requests are welcome 🍰
