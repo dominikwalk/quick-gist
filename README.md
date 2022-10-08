@@ -85,6 +85,12 @@ quick-gist add-user
 ```
 This command will allow you to add a new Github user to your configuration
 
+## TODOs
+- Allow passing a directory as file argument and add all files from this directory
+- Allow piping content directly into the tool to create a new gist (instead of files)
+- Issue warning when Github API token is about to expire
+- Add command to renew Gihub API token
+- Unittest (and refactor some functions to make them easier to test)
 
 ---
 Any pull requests are welcome 🍰
